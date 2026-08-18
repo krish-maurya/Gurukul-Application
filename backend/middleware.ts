@@ -26,27 +26,36 @@ async function verifySession(req: NextRequest): Promise<boolean> {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  try {
+    const { pathname } = req.nextUrl;
 
-  const isPublic =
-    PUBLIC_PAGES.includes(pathname) ||
-    PUBLIC_PAGE_PREFIXES.some((p) => pathname.startsWith(p)) ||
-    PUBLIC_API.includes(pathname) ||
-    PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p));
+    const isPublic =
+      PUBLIC_PAGES.includes(pathname) ||
+      PUBLIC_PAGE_PREFIXES.some((p) => pathname.startsWith(p)) ||
+      PUBLIC_API.includes(pathname) ||
+      PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p));
 
-  if (isPublic) return NextResponse.next();
+    if (isPublic) return NextResponse.next();
 
-  const authenticated = await verifySession(req);
+    const authenticated = await verifySession(req);
 
-  if (!authenticated) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    if (!authenticated) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL("/landing", req.url));
     }
-    const loginUrl = new URL("/landing", req.url);
-    return NextResponse.redirect(loginUrl);
-  }
 
-  return NextResponse.next();
+    return NextResponse.next();
+  } catch (error) {
+    // Middleware always runs at the Edge. Never let an unexpected JWT/runtime
+    // failure take down every route with Vercel's middleware crash page.
+    console.error("[middleware] request verification failed:", error);
+    if (req.nextUrl.pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 });
+    }
+    return NextResponse.redirect(new URL("/landing", req.url));
+  }
 }
 
 export const config = {
