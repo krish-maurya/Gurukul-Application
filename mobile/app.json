@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Gurukul",
+    "slug": "gurukul",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "gurukul",
+    "newArchEnabled": true,
+    "plugins": ["expo-router", "expo-secure-store", "expo-font"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gurukul.app"
+    },
+    "android": {
+      "package": "com.gurukul.app"
+    },
+    "extra": {
+      "apiUrl": "http://192.168.30.196:3000"
+    }
+  }
+}

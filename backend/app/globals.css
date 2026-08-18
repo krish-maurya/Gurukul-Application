@@ -1,0 +1,732 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Legacy CSS variables (kept for any code that reads them directly) */
+    --color-dark: #111312;
+    --color-tech: #1e3a8a;
+    --color-ocean: #687170;
+    --color-gray: rgba(17, 19, 18, 0.1);
+    --color-white: #f4f5f7;
+    --color-surface: #ffffff;
+    --color-muted: #9aa3a1;
+    --color-highlight: #f0f2f5;
+
+    /* New classic-warm design tokens */
+    --canvas: #f4f5f7;
+    --surface: #ffffff;
+    --soft: #f0f2f5;
+    --hover: #f7f8fa;
+    --ink: #111312;
+    --muted: #687170;
+    --faint: #9aa3a1;
+    --line: rgba(17, 19, 18, 0.1);
+    --line-strong: rgba(17, 19, 18, 0.15);
+    --accent: #1e3a8a;
+    --accent-soft: #e9edff;
+    --accent-text: #172a66;
+    --accent-glow: rgba(30, 58, 138, 0.08);
+    --green: #0b9f6e;
+    --green-soft: #e6f8f1;
+    --green-text: #087f58;
+    --amber: #b7791f;
+    --amber-soft: #fff6e0;
+    --amber-text: #8a5a10;
+    --red: #b91c1c;
+    --red-soft: #fef2f2;
+    --red-text: #7f1d1d;
+
+    --font-sans: "Inter", system-ui, sans-serif;
+    --font-syne: "Syne", "Inter", system-ui, sans-serif;
+  }
+
+  * {
+    border-color: var(--line);
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family:
+      var(--font-sans),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      Helvetica,
+      Arial,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-syne);
+    letter-spacing: -0.012em;
+    color: var(--ink);
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  /* ── Skeleton Loader ── */
+  .skeleton {
+    @apply bg-gurukul-soft rounded animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+  }
+  .skeleton-text {
+    @apply h-3.5 rounded;
+  }
+  .skeleton-heading {
+    @apply h-5 rounded;
+  }
+  .skeleton-avatar {
+    @apply rounded-full;
+  }
+  .skeleton-card {
+    @apply rounded-xl h-32;
+  }
+
+  /* ── Page Loader ── */
+  .page-loader {
+    @apply flex flex-col items-center justify-center gap-4 py-20;
+  }
+  .page-loader-spinner {
+    @apply w-5 h-5 border-2 border-gurukul-soft border-t-gurukul-accent rounded-full animate-spin;
+  }
+  .page-loader-text {
+    @apply text-xs text-gurukul-faint;
+  }
+
+  /* ── Classic-warm Card ── */
+  .card {
+    @apply bg-white rounded-xl border;
+    border-color: var(--line);
+    box-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.04);
+  }
+  .card-hover {
+    @apply card transition-all duration-200 hover:shadow-floating;
+    border-color: var(--line);
+  }
+  .card-hover:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+  }
+
+  /* ── Button variants (warm-classic) ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium
+           text-white rounded-lg transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-text);
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.22);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.18);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium
+           bg-white rounded-lg hover:bg-gurukul-hover active:bg-gurukul-soft
+           transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--line-strong);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium
+           rounded-lg hover:bg-gurukul-soft active:bg-gurukul-hover
+           transition-colors duration-150 disabled:opacity-40 disabled:pointer-events-none;
+    color: var(--ink);
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150;
+    color: var(--muted);
+  }
+  .btn-icon:hover {
+    color: var(--ink);
+    background: var(--soft);
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-md;
+  }
+  .badge-default {
+    @apply badge;
+    background: var(--soft);
+    color: var(--muted);
+  }
+  .badge-success {
+    @apply badge;
+    background: var(--green-soft);
+    color: var(--green-text);
+  }
+  .badge-warning {
+    @apply badge;
+    background: var(--amber-soft);
+    color: var(--amber-text);
+  }
+  .badge-error {
+    @apply badge;
+    background: var(--red-soft);
+    color: var(--red-text);
+  }
+  .badge-dark {
+    @apply badge text-white;
+    background: var(--accent);
+  }
+
+  /* ── Input ── */
+  .input {
+    @apply w-full text-sm px-3 py-2 rounded-lg bg-white transition-all duration-150;
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .input::placeholder {
+    color: var(--faint);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* ── Select ── */
+  .select {
+    @apply input appearance-none pr-8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23687170' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  /* ── Scrollbar ── */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     COPILOT CHAT DRAWER — Warm Classic Theme
+     ═══════════════════════════════════════════════════════ */
+
+  /* ── FAB ── */
+  .copilot-fab {
+    @apply flex items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-4 text-left;
+    background: var(--accent);
+    border: 1px solid var(--accent-text);
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.28);
+    transition: all 0.2s ease;
+  }
+  .copilot-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 58, 138, 0.35);
+  }
+  .copilot-fab:active {
+    transform: translateY(0);
+  }
+  .copilot-fab-ring {
+    @apply absolute -inset-0.5 rounded-xl;
+    background: transparent;
+    pointer-events: none;
+  }
+  .copilot-fab-icon {
+    @apply relative grid h-9 w-9 shrink-0 place-items-center rounded-lg;
+    background: var(--accent-text);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .copilot-fab-label {
+    @apply flex flex-col;
+  }
+  .copilot-fab-title {
+    @apply block text-[11px] font-semibold tracking-tight text-white;
+    font-family: var(--font-syne);
+  }
+  .copilot-fab-subtitle {
+    @apply mt-0.5 block text-[10px] font-medium;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ── Panel ── */
+  .copilot-panel {
+    @apply flex flex-col overflow-hidden rounded-xl;
+    width: min(400px, calc(100vw - 24px));
+    height: min(580px, calc(100vh - 40px));
+    background: #ffffff;
+    border: 1px solid var(--line);
+    box-shadow:
+      0 8px 30px rgba(15, 23, 42, 0.12),
+      0 2px 8px rgba(15, 23, 42, 0.06);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom right;
+  }
+  .copilot-panel-closed {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+    pointer-events: none;
+  }
+  .copilot-panel-open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  /* ── Header ── */
+  .copilot-header {
+    @apply relative px-4 py-3;
+    background: linear-gradient(180deg, #fbfbfc 0%, #f5f5f7 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .copilot-header-mesh {
+    display: none;
+  }
+  .copilot-header-glow {
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      var(--accent-glow),
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+  .copilot-header-avatar {
+    @apply relative grid h-8 w-8 place-items-center rounded-lg;
+    background: var(--accent-soft);
+    border: 1px solid rgba(30, 58, 138, 0.2);
+    color: var(--accent-text);
+  }
+  .copilot-status-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full;
+    background: var(--green);
+  }
+  .copilot-header-btn {
+    @apply grid h-7 w-7 place-items-center rounded-md transition-all duration-150;
+    color: var(--faint);
+  }
+  .copilot-header-btn:hover {
+    background: var(--soft);
+    color: var(--ink);
+  }
+  .copilot-role-badge {
+    @apply rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider;
+    background: var(--soft);
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+
+  /* ── Messages Area ── */
+  .copilot-messages {
+    @apply flex-1 overflow-y-auto px-4 py-3 custom-scrollbar;
+    overflow-x: hidden;
+  }
+
+  /* ── Empty State ── */
+  .copilot-empty-state {
+    @apply mx-auto flex max-w-xs flex-col items-center px-2 pt-8 text-center;
+  }
+  .copilot-empty-icon {
+    @apply grid h-12 w-12 place-items-center rounded-xl;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  /* ── Suggestion Chips ── */
+  .copilot-chip {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    transition: all 0.15s ease;
+  }
+  .copilot-chip:hover {
+    border-color: var(--line-strong);
+    background: var(--hover);
+    color: var(--ink);
+  }
+  .copilot-chip-icon {
+    color: var(--faint);
+  }
+
+  /* ── Message Rows ── */
+  .copilot-msg-row {
+    animation: slide-up 0.25s ease-out both;
+  }
+  .copilot-msg-user {
+    @apply flex justify-end;
+  }
+  .copilot-msg-bot {
+    @apply flex justify-start;
+  }
+
+  /* ── User Bubble ── */
+  .copilot-bubble-user {
+    @apply max-w-[80%] rounded-xl rounded-br-sm px-3 py-2 text-[12px] leading-[1.6] text-white;
+    background: var(--accent);
+  }
+
+  /* ── Bot Bubble ── */
+  .copilot-bubble-wrapper {
+    @apply flex max-w-[94%] gap-2;
+    min-width: 0;
+  }
+  .copilot-bot-avatar {
+    @apply mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md;
+    background: var(--accent-soft);
+    border: 1px solid rgba(30, 58, 138, 0.2);
+    color: var(--accent-text);
+  }
+  .copilot-bubble-bot {
+    @apply rounded-xl rounded-tl-sm px-3 py-2 text-[12px] leading-[1.6];
+    background: var(--hover);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* ── Typing Indicator ── */
+  .copilot-typing {
+    @apply mt-2 flex items-center gap-2;
+    animation: slide-up 0.2s ease both;
+  }
+  .copilot-typing-dots {
+    @apply flex items-center gap-1 rounded-lg px-3 py-2;
+    background: var(--hover);
+    border: 1px solid var(--line);
+  }
+  .copilot-typing-dots span {
+    @apply block h-[4px] w-[4px] rounded-full;
+    background: var(--faint);
+    animation: dot-bounce 1.4s ease-in-out infinite;
+  }
+  .copilot-typing-dots span:nth-child(2) {
+    animation-delay: 0.16s;
+  }
+  .copilot-typing-dots span:nth-child(3) {
+    animation-delay: 0.32s;
+  }
+
+  /* ── Footer / Input ── */
+  .copilot-footer {
+    border-top: 1px solid var(--line);
+    background: #ffffff;
+    @apply px-3 py-2.5;
+  }
+  .copilot-input-wrapper {
+    @apply flex items-end gap-2 rounded-lg p-1;
+    background: var(--hover);
+    border: 1px solid var(--line);
+    transition: all 0.15s ease;
+  }
+  .copilot-input-wrapper:focus-within {
+    background: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .copilot-input {
+    @apply min-h-[32px] flex-1 resize-none bg-transparent px-2.5 py-1.5 text-[12px] leading-[1.5] outline-none;
+    color: var(--ink);
+  }
+  .copilot-input::placeholder {
+    color: var(--faint);
+  }
+  .copilot-send-btn {
+    @apply grid h-7 w-7 shrink-0 place-items-center rounded-md text-white transition-all duration-150;
+    background: var(--accent);
+  }
+  .copilot-send-btn:hover:not(:disabled) {
+    background: var(--accent-text);
+  }
+  .copilot-send-btn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  .copilot-send-btn:disabled {
+    @apply cursor-not-allowed opacity-25;
+  }
+  .copilot-footer-meta {
+    @apply mt-1 flex items-center justify-between px-1;
+  }
+  .copilot-kbd {
+    @apply mx-0.5 inline-flex h-4 items-center justify-center rounded px-1 text-[8px] font-medium;
+    color: var(--faint);
+    background: var(--soft);
+    border: 1px solid var(--line);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     STRUCTURED RESULTS — Warm Classic
+     ═══════════════════════════════════════════════════════ */
+
+  .copilot-stat-card {
+    @apply rounded-lg p-2.5;
+    background: var(--hover);
+    border: 1px solid var(--line);
+  }
+  .copilot-stat-label {
+    @apply text-[9px] font-medium uppercase tracking-wider;
+    color: var(--faint);
+  }
+  .copilot-stat-value {
+    @apply mt-0.5 text-[13px] font-bold;
+    color: var(--ink);
+    font-family: var(--font-syne);
+  }
+  .copilot-table-container {
+    @apply rounded-lg overflow-hidden;
+    border: 1px solid var(--line);
+    max-width: 100%;
+  }
+  .copilot-table-header {
+    @apply flex items-center gap-1.5 px-3 py-2 text-[9px] font-medium uppercase tracking-wider;
+    background: var(--soft);
+    border-bottom: 1px solid var(--line);
+    color: var(--faint);
+  }
+  .copilot-table-scroll {
+    @apply max-h-48 overflow-x-auto overflow-y-auto custom-scrollbar;
+  }
+  .copilot-table-thead {
+    @apply sticky top-0;
+    background: #ffffff;
+  }
+  .copilot-table-th {
+    @apply whitespace-nowrap px-3 py-1.5 text-[9px] font-medium uppercase tracking-wider;
+    color: var(--faint);
+  }
+  .copilot-table-tr {
+    @apply transition-colors duration-100;
+    border-top: 1px solid var(--hover);
+  }
+  .copilot-table-tr:hover {
+    background: var(--hover);
+  }
+  .copilot-table-td {
+    @apply whitespace-nowrap px-3 py-1.5;
+    color: var(--muted);
+  }
+  .copilot-status-pill {
+    @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-medium;
+  }
+  .copilot-status-good {
+    background: var(--green-soft);
+    color: var(--green-text);
+  }
+  .copilot-status-bad {
+    background: var(--red-soft);
+    color: var(--red-text);
+  }
+  .copilot-status-neutral {
+    background: var(--amber-soft);
+    color: var(--amber-text);
+  }
+  .copilot-confirmation-bar {
+    @apply flex items-center gap-2 rounded-lg p-2.5 text-[10px] font-medium;
+    background: var(--amber-soft);
+    border: 1px solid rgba(183, 121, 31, 0.25);
+    color: var(--amber-text);
+  }
+  .copilot-sources {
+    @apply pt-2;
+    border-top: 1px solid var(--hover);
+  }
+  .copilot-sources-title {
+    @apply mb-1 flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider;
+    color: var(--faint);
+  }
+  .copilot-source-item {
+    @apply flex items-center gap-1.5 text-[10px] leading-5;
+    color: var(--faint);
+  }
+  .copilot-source-dot {
+    @apply inline-block h-1 w-1 shrink-0 rounded-full;
+    background: var(--faint);
+  }
+  .copilot-action-btn {
+    @apply inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-white transition-all duration-150;
+    background: var(--accent);
+  }
+  .copilot-action-btn:hover {
+    background: var(--accent-text);
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);
+  }
+  .copilot-profile-card {
+    @apply rounded-lg overflow-hidden;
+    border: 1px solid var(--line);
+  }
+  .copilot-profile-header {
+    @apply flex items-center gap-2 px-3 py-2.5;
+    background: var(--soft);
+    border-bottom: 1px solid var(--line);
+  }
+  .copilot-profile-avatar {
+    @apply grid h-7 w-7 shrink-0 place-items-center rounded-md;
+    background: var(--accent-soft);
+    border: 1px solid rgba(30, 58, 138, 0.2);
+    color: var(--accent-text);
+  }
+  .copilot-profile-name {
+    @apply text-[11px] font-semibold;
+    color: var(--ink);
+    font-family: var(--font-syne);
+  }
+  .copilot-profile-meta {
+    @apply text-[10px];
+    color: var(--faint);
+  }
+  .copilot-profile-fields {
+    @apply divide-y;
+    background: #ffffff;
+    border-color: var(--hover);
+  }
+  .copilot-profile-row {
+    @apply flex items-start justify-between gap-3 px-3 py-1.5;
+  }
+  .copilot-profile-label {
+    @apply shrink-0 text-[9px] font-medium uppercase tracking-wider;
+    color: var(--faint);
+    min-width: 72px;
+  }
+  .copilot-profile-value {
+    @apply text-right text-[10px];
+    color: var(--muted);
+    word-break: break-word;
+  }
+  .copilot-bubble-bot strong {
+    @apply font-semibold;
+    color: var(--ink);
+  }
+  .copilot-bubble-bot em {
+    @apply italic;
+    color: var(--muted);
+  }
+
+  /* ── Attendance Result Animations ── */
+  .attendance-result-card {
+    animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .attendance-result-icon svg {
+    animation: check-pop 0.4s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .attendance-result-backdrop {
+    animation: fade-in 0.15s ease-out both;
+  }
+  .attendance-result-ring {
+    animation: pulse-ring 1s 0.2s ease-out infinite;
+  }
+  .attendance-confetti {
+    display: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     NOTIFICATION PANEL — Global blur/dim when open
+     ═══════════════════════════════════════════════════════ */
+  html[data-notifications-open] aside.sticky {
+    filter: blur(4px);
+    opacity: 0.7;
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+  html[data-notifications-open] header.sticky {
+    filter: blur(4px);
+    opacity: 0.7;
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+  html[data-notifications-open] .fixed:not([role="dialog"]) {
+    filter: blur(4px);
+    opacity: 0.7;
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+  html[data-notifications-open] main {
+    filter: blur(2px);
+    opacity: 0.85;
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+
+  /* ── Mobile Sidebar Overlay ── */
+  html[data-mobile-sidebar-open] body {
+    overflow: hidden;
+  }
+}
+
+/* ── Global scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted, #687170);
+}
+
+/* ── Mobile Sidebar Slide Transition ── */
+.mobile-sidebar-panel {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mobile-sidebar-backdrop {
+  transition: opacity 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

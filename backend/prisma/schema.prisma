@@ -1,0 +1,315 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("TEACHER") // ADMIN or TEACHER
+  avatar       String?
+  staffId      String?  @unique
+  staff        Staff?   @relation(fields: [staffId], references: [id])
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Invitation {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  email     String
+  name      String
+  role      String    @default("TEACHER")
+  staffId   String?   @unique
+  staff     Staff?    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Student {
+  id                String            @id @default(uuid())
+  rollNumber        Int               @default(1)
+  name              String
+  dob               String
+  grade             String
+  parentName        String
+  contact           String
+  parentEmail       String?
+  portalToken       String?           @unique
+  address           String?
+  medicalNotes      String?
+  previousSchool    String?
+  status            String            @default("PENDING") // PENDING, ADMITTED, REJECTED
+  attendanceEntries AttendanceEntry[]
+  feeAccount         FeeAccount?
+  parentMessages    ParentMessage[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model ParentMessage {
+  id             String    @id @default(uuid())
+  studentId      String
+  student        Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type           String    @default("CUSTOM") // ABSENCE | FEE | ANNOUNCEMENT | CUSTOM
+  title          String
+  body           String
+  status         String    @default("DRAFT") // DRAFT | SENT | ACKNOWLEDGED
+  sentByName     String?
+  sentAt         DateTime?
+  acknowledgedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([studentId, status])
+  @@index([status, createdAt])
+}
+
+model FeeAccount {
+  id            String       @id @default(uuid())
+  studentId     String       @unique
+  student       Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear  String       @default("2026-27")
+  amountDue     Int
+  amountPaid    Int          @default(0)
+  dueDate       String
+  status        String       @default("PENDING") // PAID, PARTIAL, PENDING, OVERDUE
+  payments      FeePayment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model FeePayment {
+  id           String     @id @default(uuid())
+  feeAccountId String
+  feeAccount   FeeAccount @relation(fields: [feeAccountId], references: [id], onDelete: Cascade)
+  amount       Int
+  paidAt       String
+  method       String
+  receiptNo    String     @unique
+  createdAt    DateTime   @default(now())
+}
+
+model AIConversation {
+  id        String      @id @default(uuid())
+  userId    String
+  title     String      @default("New conversation")
+  messages  AIMessage[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model AIMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String
+  metadata       String?
+  createdAt      DateTime       @default(now())
+}
+
+model Staff {
+  id                    String             @id @default(uuid())
+  name                  String
+  email                 String             @unique
+  department            String
+  maxPeriodsPerDay      Int                @default(4)
+  maxPeriodsPerWeek     Int                @default(24)
+  maxProxiesPerDay      Int                @default(2)
+  isActive              Boolean            @default(true)
+  avatar                String?
+  timetableSlots        TimetableSlot[]
+  attendanceRecords     AttendanceRecord[]
+  subjectQualifications StaffSubject[]
+  leaves                TeacherLeave[]
+  proxyAssignments      ProxyAssignment[]
+  workloads             TeacherWorkload[]
+  user                  User?
+  invitation            Invitation?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+}
+
+model Room {
+  id             String            @id @default(uuid())
+  roomNumber     String            @unique
+  building       String
+  capacity       Int
+  type           String            @default("LECTURE")
+  isAvailable    Boolean           @default(true)
+  timetableSlots TimetableSlot[]
+  reservations   RoomReservation[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model Subject {
+  id                  String          @id @default(uuid())
+  code                String          @unique
+  name                String
+  weeklyPeriods       Int             @default(3)
+  requiresLab         Boolean         @default(false)
+  timetableSlots      TimetableSlot[]
+  staffQualifications StaffSubject[]
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model StaffSubject {
+  staffId     String
+  subjectId   String
+  isPreferred Boolean @default(false)
+  staff       Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  subject     Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([staffId, subjectId])
+}
+
+model TimetableSlot {
+  id               String            @id @default(uuid())
+  day              String // Mon, Tue, Wed, Thu, Fri
+  period           Int // 1 to 6
+  grade            String // e.g., "Grade 10A"
+  subjectId        String
+  subject          Subject           @relation(fields: [subjectId], references: [id])
+  teacherId        String
+  teacher          Staff             @relation(fields: [teacherId], references: [id])
+  roomId           String
+  room             Room              @relation(fields: [roomId], references: [id])
+  proxyAssignments ProxyAssignment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([day, period, teacherId])
+  @@index([day, period, roomId])
+}
+
+model TeacherLeave {
+  id        String   @id @default(uuid())
+  teacherId String
+  date      String // YYYY-MM-DD
+  status    String   @default("APPROVED") // APPROVED, CANCELLED
+  reason    String?
+  createdAt DateTime @default(now())
+  teacher   Staff    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, date])
+  @@index([date, status])
+}
+
+model ProxyAssignment {
+  id               String        @id @default(uuid())
+  timetableSlotId  String
+  absentTeacherId  String
+  proxyTeacherId   String?
+  date             String // YYYY-MM-DD
+  status           String        @default("PENDING") // PENDING, ASSIGNED, CANCELLED
+  recommendations  String        @default("[]") // deterministic score snapshots as JSON
+  selectedByUserId String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  timetableSlot    TimetableSlot @relation(fields: [timetableSlotId], references: [id], onDelete: Cascade)
+  proxyTeacher     Staff?        @relation(fields: [proxyTeacherId], references: [id])
+
+  @@unique([timetableSlotId, date])
+  @@index([date, proxyTeacherId])
+}
+
+model TeacherWorkload {
+  id           String   @id @default(uuid())
+  teacherId    String
+  date         String // YYYY-MM-DD
+  lectureCount Int      @default(0)
+  proxyCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  teacher      Staff    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, date])
+}
+
+model RoomReservation {
+  id              String   @id @default(uuid())
+  roomId          String
+  date            String // YYYY-MM-DD
+  day             String
+  period          Int
+  status          String   @default("ACTIVE") // ACTIVE, CANCELLED
+  timetableSlotId String?
+  reason          String?
+  createdAt       DateTime @default(now())
+  room            Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([date, day, period, roomId])
+}
+
+model SchedulingConstraint {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TimetableConflict {
+  id            String   @id @default(uuid())
+  type          String // TEACHER_CLASH, ROOM_CLASH, CAPACITY_EXCEEDED
+  severity      String // CRITICAL, WARNING
+  description   String
+  suggestedFix  String
+  day           String
+  period        Int
+  affectedSlots String // JSON serialized string of slot IDs or details
+  createdAt     DateTime @default(now())
+}
+
+model DocumentRecord {
+  id              String   @id @default(uuid())
+  fileName        String
+  documentType    String   @default("Admission Form")
+  status          String   @default("PROCESSING") // UPLOADING, PROCESSING, NEEDS_REVIEW, APPROVED, REJECTED
+  confidenceScore Float    @default(0.0)
+  rawText         String?
+  extractedFields String // JSON serialized extracted fields
+  fileUrl         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AttendanceRecord {
+  id               String            @id @default(uuid())
+  grade            String // e.g. "Grade 10A"
+  section          String            @default("A")
+  date             String // YYYY-MM-DD
+  period           Int               @default(1)
+  takenByTeacherId String?
+  takenByTeacher   Staff?            @relation(fields: [takenByTeacherId], references: [id])
+  status           String            @default("SUBMITTED") // SUBMITTED, DRAFT
+  entries          AttendanceEntry[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([grade, section, date])
+}
+
+model AttendanceEntry {
+  id                 String           @id @default(uuid())
+  attendanceRecordId String
+  attendanceRecord   AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Cascade)
+  studentId          String
+  student            Student          @relation(fields: [studentId], references: [id])
+  rollNumber         Int
+  status             String           @default("PRESENT") // PRESENT, ABSENT
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}

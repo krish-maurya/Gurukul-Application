@@ -1,0 +1,17 @@
+import React, { useState, useEffect } from 'react';import { View, Text, Pressable, FlatList, TextInput, StyleSheet } from 'react-native';import { Ionicons } from '@expo/vector-icons';import { router } from 'expo-router';import { Card, Badge, PageLoader, EmptyState } from '@/src/components/UI';import api from '@/src/api/client';import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
+interface StaffMember { id: string; name: string; email: string; department: string; isActive: boolean; maxPeriodsPerDay: number; }
+
+export default function StaffScreen() {  const [staff, setStaff] = useState<StaffMember[]>([]);  const [loading, setLoading] = useState(true);  const [search, setSearch] = useState('');
+
+  useEffect(() => {    api.get<StaffMember[]>('/api/staff').then(({ data }) => {      setStaff(data ?? []);      setLoading(false);    });  }, []);
+
+  const filtered = search    ? staff.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.department.toLowerCase().includes(search.toLowerCase()))    : staff;
+
+  return (    <View style={styles.container}>      <View style={styles.searchWrap}>        <Ionicons name="search" size={18} color={Colors.faint} />        <TextInput style={styles.searchInput} placeholder="Search staff..." placeholderTextColor={Colors.faint} value={search} onChangeText={setSearch} />      </View>
+      {loading ? <PageLoader text="Loading staff..." /> : (
+        <FlatList          data={filtered}          keyExtractor={item => item.id}          contentContainerStyle={styles.list}          ListEmptyComponent={<EmptyState icon="people-outline" title="No staff found" />}          renderItem={({ item }) => (            <Card style={styles.card} onPress={() => router.push(`/staff/${item.id}` as any)}>
+              <View style={styles.cardRow}>                <View style={[styles.avatar, { backgroundColor: item.isActive ? Colors.accentSoft : Colors.redSoft }]}>                  <Ionicons name="person" size={18} color={item.isActive ? Colors.accent : Colors.red} />                </View>                <View style={styles.cardInfo}>                  <Text style={styles.cardName}>{item.name}</Text>                  <Text style={styles.cardDept}>{item.department}</Text>                  <Text style={styles.cardEmail}>{item.email}</Text>                </View>                <Badge variant={item.isActive ? 'success' : 'error'}>{item.isActive ? 'Active' : 'Inactive'}</Badge>              </View>            </Card>
+          )}        />
+      )}    </View>  );}
+
+const styles = StyleSheet.create({  container: { flex: 1, backgroundColor: Colors.canvas },  searchWrap: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, margin: Spacing.lg, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.line, borderRadius: Radius.md, paddingHorizontal: Spacing.md, height: 44 },  searchInput: { flex: 1, fontSize: FontSize.md, color: Colors.ink, padding: 0, height: 44 },  list: { padding: 0, paddingHorizontal: Spacing.lg, paddingBottom: 100 },  card: { marginBottom: Spacing.sm },  cardRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },  avatar: { width: 40, height: 40, borderRadius: Radius.full, alignItems: 'center', justifyContent: 'center' },  cardInfo: { flex: 1, minWidth: 0 },  cardName: { fontSize: FontSize.md, fontWeight: '600', color: Colors.ink },  cardDept: { fontSize: FontSize.sm, color: Colors.muted, marginTop: 2 },  cardEmail: { fontSize: FontSize.sm, color: Colors.faint, marginTop: 1 },});
