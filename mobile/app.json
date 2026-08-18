@@ -17,7 +17,7 @@
       "package": "com.gurukul.app"
     },
     "extra": {
-      "apiUrl": "http://192.168.30.196:3000"
+      "apiUrl": ""
     }
   }
 }

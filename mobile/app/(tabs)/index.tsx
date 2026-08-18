@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,13 @@ import {
   ScrollView,
   StyleSheet,
   RefreshControl,
-} from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/src/context/auth';
-import { Card, Badge, PageLoader } from '@/src/components/UI';
-import api from '@/src/api/client';
-import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
+} from "react-native";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/src/context/auth";
+import { Card, Badge, PageLoader } from "@/src/components/UI";
+import api from "@/src/api/client";
+import { Colors, Spacing, Radius, FontSize } from "@/src/theme";
 
 /* ------------------------------------------------------------------ */
 /*  Static data (same as web dashboard)                                */
@@ -20,65 +20,65 @@ import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
 
 const METRICS = [
   {
-    icon: 'people-outline' as const,
+    icon: "people-outline" as const,
     iconBg: Colors.accentSoft,
     iconColor: Colors.accent,
-    label: 'TOTAL STUDENTS',
-    value: '342',
-    detail: '+12 this semester',
+    label: "TOTAL STUDENTS",
+    value: "342",
+    detail: "+12 this semester",
   },
   {
-    icon: 'checkmark-done-outline' as const,
+    icon: "checkmark-done-outline" as const,
     iconBg: Colors.greenSoft,
     iconColor: Colors.green,
-    label: 'STAFF',
-    value: '91.5%',
-    detail: 'Attendance rate',
+    label: "STAFF",
+    value: "91.5%",
+    detail: "Attendance rate",
   },
   {
-    icon: 'checkbox-outline' as const,
+    icon: "checkbox-outline" as const,
     iconBg: Colors.amberSoft,
     iconColor: Colors.amber,
     label: "TODAY'S ATTENDANCE",
-    value: '96.4%',
-    detail: 'Across all classes',
+    value: "96.4%",
+    detail: "Across all classes",
   },
   {
-    icon: 'time-outline' as const,
+    icon: "time-outline" as const,
     iconBg: Colors.redSoft,
     iconColor: Colors.red,
-    label: 'PENDING REVIEWS',
-    value: '1',
-    detail: 'Requires attention',
+    label: "PENDING REVIEWS",
+    value: "1",
+    detail: "Requires attention",
   },
 ];
 
 const WEEKLY_DATA = [
-  { day: 'Mon', value: 94 },
-  { day: 'Tue', value: 97 },
-  { day: 'Wed', value: 92 },
-  { day: 'Thu', value: 96 },
-  { day: 'Fri', value: 89 },
+  { day: "Mon", value: 94 },
+  { day: "Tue", value: 97 },
+  { day: "Wed", value: 92 },
+  { day: "Thu", value: 96 },
+  { day: "Fri", value: 89 },
 ];
 
 const ACTIVITIES = [
   {
     dotColor: Colors.green,
-    title: 'Grade 10A Attendance Submitted',
-    detail: '32 students marked present',
-    time: '2 min ago',
+    title: "Grade 10A Attendance Submitted",
+    detail: "32 students marked present",
+    time: "2 min ago",
   },
   {
     dotColor: Colors.amber,
-    title: 'OCR Document Ingested',
-    detail: 'timetable_draft.pdf processed',
-    time: '15 min ago',
+    title: "OCR Document Ingested",
+    detail: "timetable_draft.pdf processed",
+    time: "15 min ago",
   },
   {
     dotColor: Colors.red,
-    title: 'Timetable Conflict Detected',
-    detail: 'Room 204 double-booked Wed 10 AM',
-    time: '1 hr ago',
+    title: "Timetable Conflict Detected",
+    detail: "Room 204 double-booked Wed 10 AM",
+    time: "1 hr ago",
   },
 ];
 
@@ -108,30 +108,36 @@ export default function DashboardScreen() {
       style={styles.canvas}
       contentContainerStyle={styles.content}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.accent} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={Colors.accent}
+        />
       }
       showsVerticalScrollIndicator={false}
     >
       {/* ---- Welcome Banner ---- */}
       <Card style={styles.bannerCard}>
         <View style={styles.bannerInner}>
-          <Badge>{currentUser?.role || 'Admin'}</Badge>
+          <Badge>{currentUser?.role || "Admin"}</Badge>
           <Text style={styles.bannerGreeting}>
-            Welcome, {currentUser?.name || 'User'}
+            Welcome, {currentUser?.name || "User"}
           </Text>
           <Text style={styles.bannerTitle}>Dashboard</Text>
-          <Text style={styles.bannerSubtitle}>Overview of school operations</Text>
+          <Text style={styles.bannerSubtitle}>
+            Overview of school operations
+          </Text>
           <View style={styles.bannerActions}>
             <Pressable
               style={styles.btnPrimary}
-              onPress={() => router.push('/attendance')}
+              onPress={() => router.push("/attendance")}
             >
               <Ionicons name="checkbox-outline" size={16} color="#ffffff" />
               <Text style={styles.btnPrimaryText}>Attendance</Text>
             </Pressable>
             <Pressable
               style={styles.btnSecondary}
-              onPress={() => router.push('/timetable')}
+              onPress={() => router.push("/timetable")}
             >
               <Ionicons name="calendar-outline" size={16} color={Colors.ink} />
               <Text style={styles.btnSecondaryText}>Timetable</Text>
@@ -165,10 +171,7 @@ export default function DashboardScreen() {
               <View key={d.day} style={styles.chartBarWrapper}>
                 <View style={styles.chartBarTrack}>
                   <View
-                    style={[
-                      styles.chartBar,
-                      { height: `${heightPct}%` },
-                    ]}
+                    style={[styles.chartBar, { height: `${heightPct}%` }]}
                   />
                 </View>
                 <Text style={styles.chartLabel}>{d.day}</Text>
@@ -184,7 +187,9 @@ export default function DashboardScreen() {
         <View style={styles.activityList}>
           {ACTIVITIES.map((a, i) => (
             <View key={i} style={styles.activityItem}>
-              <View style={[styles.activityDot, { backgroundColor: a.dotColor }]} />
+              <View
+                style={[styles.activityDot, { backgroundColor: a.dotColor }]}
+              />
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>{a.title}</Text>
                 <Text style={styles.activityDetail}>{a.detail}</Text>
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontSize: FontSize.xxxl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -239,13 +244,13 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   bannerActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.md,
     marginTop: Spacing.sm,
   },
   btnPrimary: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.sm,
     backgroundColor: Colors.accent,
     paddingVertical: Spacing.md,
@@ -254,13 +259,13 @@ const styles = StyleSheet.create({
   },
   btnPrimaryText: {
     fontSize: FontSize.base,
-    fontWeight: '500',
-    color: '#ffffff',
+    fontWeight: "500",
+    color: "#ffffff",
     includeFontPadding: false,
   },
   btnSecondary: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.sm,
     backgroundColor: Colors.surface,
     borderWidth: 1,
@@ -271,42 +276,42 @@ const styles = StyleSheet.create({
   },
   btnSecondaryText: {
     fontSize: FontSize.base,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.ink,
     includeFontPadding: false,
   },
 
   /* ---- Key Metrics ---- */
   metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-    marginHorizontal: -Spacing.sm, // offset inner padding so outer gap is even
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: Spacing.md,
   },
   metricCard: {
-    width: '48%',
-    marginLeft: '1%',
-    marginRight: '1%',
+    // Avoid combining percentage widths with margins and a gap: together
+    // they exceed a narrow phone row and force a one-column layout.
+    width: "48%",
     gap: Spacing.sm,
   },
   metricIconBox: {
     width: 36,
     height: 36,
     borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   metricLabel: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.faint,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
     includeFontPadding: false,
   },
   metricValue: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -322,7 +327,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -332,27 +337,27 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   chartContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    alignItems: "flex-end",
     gap: Spacing.md,
     height: 140,
     paddingTop: Spacing.md,
   },
   chartBarWrapper: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     gap: Spacing.sm,
   },
   chartBarTrack: {
-    width: '100%',
+    width: "100%",
     height: 100,
     backgroundColor: Colors.soft,
     borderRadius: Radius.sm,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
+    justifyContent: "flex-end",
+    overflow: "hidden",
   },
   chartBar: {
-    width: '100%',
+    width: "100%",
     backgroundColor: Colors.accent,
     borderRadius: Radius.sm,
   },
@@ -368,8 +373,8 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   activityItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: Spacing.md,
   },
   activityDot: {
@@ -384,7 +389,7 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: FontSize.base,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.ink,
     includeFontPadding: false,
   },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,12 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
-} from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Card, Badge, PageLoader, EmptyState } from '@/src/components/UI';
-import api from '@/src/api/client';
-import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
+} from "react-native";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Card, Badge, PageLoader, EmptyState } from "@/src/components/UI";
+import api from "@/src/api/client";
+import { Colors, Spacing, Radius, FontSize } from "@/src/theme";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -19,17 +19,20 @@ import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
 
 interface Student {
   id: string;
-  rollNumber: string;
+  rollNumber: number;
   name: string;
   grade: string;
   parentName: string;
-  status: 'PENDING' | 'ADMITTED' | 'REJECTED';
+  status: "PENDING" | "ADMITTED" | "REJECTED";
 }
 
-const STATUS_MAP: Record<Student['status'], { variant: 'warning' | 'success' | 'error'; label: string }> = {
-  PENDING: { variant: 'warning', label: 'Pending' },
-  ADMITTED: { variant: 'success', label: 'Admitted' },
-  REJECTED: { variant: 'error', label: 'Rejected' },
+const STATUS_MAP: Record<
+  Student["status"],
+  { variant: "warning" | "success" | "error"; label: string }
+> = {
+  PENDING: { variant: "warning", label: "Pending" },
+  ADMITTED: { variant: "success", label: "Admitted" },
+  REJECTED: { variant: "error", label: "Rejected" },
 };
 
 /* ------------------------------------------------------------------ */
@@ -39,7 +42,7 @@ const STATUS_MAP: Record<Student['status'], { variant: 'warning' | 'success' | '
 export default function StudentsScreen() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [grades, setGrades] = useState<string[]>([]);
   const [activeGrade, setActiveGrade] = useState<string | null>(null);
 
@@ -49,25 +52,40 @@ export default function StudentsScreen() {
 
     async function fetchStudents() {
       setLoading(true);
-      const { data } = await api.get<Student[]>('/api/students');
+      const { data } = await api.get<Student[]>("/api/students");
       if (!cancelled && data) {
-        setStudents(data);
-        const uniqueGrades = Array.from(new Set(data.map((s) => s.grade))).sort();
+        setStudents(
+          [...data].sort(
+            (a, b) =>
+              a.grade.localeCompare(b.grade, undefined, { numeric: true }) ||
+              a.rollNumber - b.rollNumber ||
+              a.name.localeCompare(b.name),
+          ),
+        );
+        const uniqueGrades = Array.from(new Set(data.map((s) => s.grade))).sort(
+          (a, b) => a.localeCompare(b, undefined, { numeric: true }),
+        );
         setGrades(uniqueGrades);
       }
       if (!cancelled) setLoading(false);
     }
 
     fetchStudents();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /* ---- Derived list ---- */
   const filtered = students.filter((s) => {
     const matchesSearch =
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.rollNumber.toLowerCase().includes(search.toLowerCase()) ||
-      s.parentName.toLowerCase().includes(search.toLowerCase());
+      String(s.name || "")
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      String(s.rollNumber ?? "").includes(search.trim()) ||
+      String(s.parentName || "")
+        .toLowerCase()
+        .includes(search.toLowerCase());
     const matchesGrade = activeGrade ? s.grade === activeGrade : true;
     return matchesSearch && matchesGrade;
   });
@@ -102,7 +120,14 @@ export default function StudentsScreen() {
             style={[styles.chip, activeGrade === null && styles.chipActive]}
             onPress={() => setActiveGrade(null)}
           >
-            <Text style={[styles.chipText, activeGrade === null && styles.chipTextActive]}>All</Text>
+            <Text
+              style={[
+                styles.chipText,
+                activeGrade === null && styles.chipTextActive,
+              ]}
+            >
+              All
+            </Text>
           </Pressable>
           {grades.map((g) => (
             <Pressable
@@ -110,7 +135,14 @@ export default function StudentsScreen() {
               style={[styles.chip, activeGrade === g && styles.chipActive]}
               onPress={() => setActiveGrade(activeGrade === g ? null : g)}
             >
-              <Text style={[styles.chipText, activeGrade === g && styles.chipTextActive]}>{g}</Text>
+              <Text
+                style={[
+                  styles.chipText,
+                  activeGrade === g && styles.chipTextActive,
+                ]}
+              >
+                {g}
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -126,13 +158,20 @@ export default function StudentsScreen() {
           <EmptyState
             iconName="people-outline"
             title="No students found"
-            subtitle={search || activeGrade ? 'Try adjusting your search or filter' : 'No students have been added yet'}
+            subtitle={
+              search || activeGrade
+                ? "Try adjusting your search or filter"
+                : "No students have been added yet"
+            }
           />
         }
         renderItem={({ item }) => {
           const st = STATUS_MAP[item.status];
           return (
-            <Card style={styles.studentCard} onPress={() => onPressStudent(item.id)}>
+            <Card
+              style={styles.studentCard}
+              onPress={() => onPressStudent(item.id)}
+            >
               <View style={styles.cardTop}>
                 <View style={styles.cardInfo}>
                   <Text style={styles.rollNumber}>#{item.rollNumber}</Text>
@@ -142,7 +181,9 @@ export default function StudentsScreen() {
               </View>
               <View style={styles.cardBottom}>
                 <Badge>{item.grade}</Badge>
-                <Text style={styles.parentName} numberOfLines={1}>{item.parentName}</Text>
+                <Text style={styles.parentName} numberOfLines={1}>
+                  {item.parentName}
+                </Text>
               </View>
             </Card>
           );
@@ -169,8 +210,8 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
   },
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.md,
     backgroundColor: Colors.surface,
     borderWidth: 1,
@@ -189,7 +230,7 @@ const styles = StyleSheet.create({
 
   /* ---- Filter chips ---- */
   chipsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
@@ -208,12 +249,12 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: FontSize.base,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.muted,
     includeFontPadding: false,
   },
   chipTextActive: {
-    color: '#ffffff',
+    color: "#ffffff",
   },
 
   /* ---- List ---- */
@@ -228,9 +269,9 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   cardTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
   cardInfo: {
     flex: 1,
@@ -244,13 +285,13 @@ const styles = StyleSheet.create({
   },
   studentName: {
     fontSize: FontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.ink,
     includeFontPadding: false,
   },
   cardBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.md,
   },
   parentName: {

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Card, Badge, PageLoader } from '@/src/components/UI';
-import api from '@/src/api/client';
-import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
+import React, { useState, useEffect } from "react";
+import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Card, Badge, PageLoader } from "@/src/components/UI";
+import api from "@/src/api/client";
+import { Colors, Spacing, Radius, FontSize } from "@/src/theme";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -19,7 +19,7 @@ interface Student {
   contact: string;
   dob: string;
   address: string;
-  status: 'PENDING' | 'ADMITTED' | 'REJECTED';
+  status: "PENDING" | "ADMITTED" | "REJECTED";
 }
 
 interface FeeSummary {
@@ -49,27 +49,33 @@ interface Payment {
   date: string;
   description: string;
   amount: number;
-  mode: 'Cash' | 'UPI' | 'Online' | 'Check';
-  status: 'COMPLETED' | 'PENDING' | 'FAILED';
+  mode: "Cash" | "UPI" | "Online" | "Check";
+  status: "COMPLETED" | "PENDING" | "FAILED";
 }
 
-const STATUS_MAP: Record<Student['status'], { variant: 'warning' | 'success' | 'error'; label: string }> = {
-  PENDING: { variant: 'warning', label: 'Pending' },
-  ADMITTED: { variant: 'success', label: 'Admitted' },
-  REJECTED: { variant: 'error', label: 'Rejected' },
+const STATUS_MAP: Record<
+  Student["status"],
+  { variant: "warning" | "success" | "error"; label: string }
+> = {
+  PENDING: { variant: "warning", label: "Pending" },
+  ADMITTED: { variant: "success", label: "Admitted" },
+  REJECTED: { variant: "error", label: "Rejected" },
 };
 
-const PAYMENT_STATUS_MAP: Record<Payment['status'], { variant: 'success' | 'warning' | 'error'; label: string }> = {
-  COMPLETED: { variant: 'success', label: 'Completed' },
-  PENDING: { variant: 'warning', label: 'Pending' },
-  FAILED: { variant: 'error', label: 'Failed' },
+const PAYMENT_STATUS_MAP: Record<
+  Payment["status"],
+  { variant: "success" | "warning" | "error"; label: string }
+> = {
+  COMPLETED: { variant: "success", label: "Completed" },
+  PENDING: { variant: "warning", label: "Pending" },
+  FAILED: { variant: "error", label: "Failed" },
 };
 
-const MODE_ICON: Record<Payment['mode'], string> = {
-  Cash: 'cash-outline',
-  UPI: 'phone-portrait-outline',
-  Online: 'globe-outline',
-  Check: 'document-text-outline',
+const MODE_ICON: Record<Payment["mode"], string> = {
+  Cash: "cash-outline",
+  UPI: "phone-portrait-outline",
+  Online: "globe-outline",
+  Check: "document-text-outline",
 };
 
 /* ------------------------------------------------------------------ */
@@ -77,17 +83,17 @@ const MODE_ICON: Record<Payment['mode'], string> = {
 /* ------------------------------------------------------------------ */
 
 function formatCurrency(value: unknown): string {
-  const amount = typeof value === 'number' ? value : Number(value);
-  return `₹${Number.isFinite(amount) ? amount.toLocaleString('en-IN') : '0'}`;
+  const amount = typeof value === "number" ? value : Number(value);
+  return `₹${Number.isFinite(amount) ? amount.toLocaleString("en-IN") : "0"}`;
 }
 
 function formatDate(dateStr: string): string {
-  if (!dateStr) return '—';
+  if (!dateStr) return "—";
   try {
-    return new Date(dateStr).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   } catch {
     return dateStr;
@@ -127,23 +133,33 @@ export default function StudentProfileScreen() {
             totalFees: Number.isFinite(totalFees) ? totalFees : 0,
             paid: Number.isFinite(paid) ? paid : 0,
             pending: Math.max(0, totalFees - paid),
-            overdue: account.status === 'OVERDUE' ? Math.max(0, totalFees - paid) : 0,
+            overdue:
+              account.status === "OVERDUE" ? Math.max(0, totalFees - paid) : 0,
           });
-          setPayments((account.payments ?? []).map((payment) => ({
-            id: payment.id,
-            date: payment.paidAt ?? '',
-            description: 'Fee payment',
-            amount: Number(payment.amount ?? 0),
-            mode: payment.method === 'UPI' ? 'UPI' : payment.method === 'BANK' ? 'Online' : 'Cash',
-            status: 'COMPLETED',
-          })));
+          setPayments(
+            (account.payments ?? []).map((payment) => ({
+              id: payment.id,
+              date: payment.paidAt ?? "",
+              description: "Fee payment",
+              amount: Number(payment.amount ?? 0),
+              mode:
+                payment.method === "UPI"
+                  ? "UPI"
+                  : payment.method === "BANK"
+                    ? "Online"
+                    : "Cash",
+              status: "COMPLETED",
+            })),
+          );
         }
       }
       if (!cancelled) setLoading(false);
     }
 
     fetchAll();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   /* ---- Loading ---- */
@@ -167,33 +183,65 @@ export default function StudentProfileScreen() {
 
   /* ---- Info rows ---- */
   const infoRows: { icon: string; label: string; value: string }[] = [
-    { icon: 'school-outline', label: 'Grade', value: student.grade },
-    { icon: 'hash-outline', label: 'Roll Number', value: student.rollNumber },
-    { icon: 'person-outline', label: 'Parent', value: student.parentName },
-    { icon: 'call-outline', label: 'Contact', value: student.contact || '—' },
-    { icon: 'calendar-outline', label: 'Date of Birth', value: formatDate(student.dob) },
-    { icon: 'location-outline', label: 'Address', value: student.address || '—' },
+    { icon: "school-outline", label: "Grade", value: student.grade },
+    { icon: "hash-outline", label: "Roll Number", value: student.rollNumber },
+    { icon: "person-outline", label: "Parent", value: student.parentName },
+    { icon: "call-outline", label: "Contact", value: student.contact || "—" },
+    {
+      icon: "calendar-outline",
+      label: "Date of Birth",
+      value: formatDate(student.dob),
+    },
+    {
+      icon: "location-outline",
+      label: "Address",
+      value: student.address || "—",
+    },
   ];
 
   /* ---- Fee summary cards ---- */
   const feeCards = [
-    { label: 'Total Fees', value: fees ? formatCurrency(fees.totalFees) : '—', color: Colors.accent, bg: Colors.accentSoft, icon: 'wallet-outline' },
-    { label: 'Paid', value: fees ? formatCurrency(fees.paid) : '—', color: Colors.green, bg: Colors.greenSoft, icon: 'checkmark-circle-outline' },
-    { label: 'Pending', value: fees ? formatCurrency(fees.pending) : '—', color: Colors.amber, bg: Colors.amberSoft, icon: 'time-outline' },
-    { label: 'Overdue', value: fees ? formatCurrency(fees.overdue) : '—', color: Colors.red, bg: Colors.redSoft, icon: 'alert-circle-outline' },
+    {
+      label: "Total Fees",
+      value: fees ? formatCurrency(fees.totalFees) : "—",
+      color: Colors.accent,
+      bg: Colors.accentSoft,
+      icon: "wallet-outline",
+    },
+    {
+      label: "Paid",
+      value: fees ? formatCurrency(fees.paid) : "—",
+      color: Colors.green,
+      bg: Colors.greenSoft,
+      icon: "checkmark-circle-outline",
+    },
+    {
+      label: "Pending",
+      value: fees ? formatCurrency(fees.pending) : "—",
+      color: Colors.amber,
+      bg: Colors.amberSoft,
+      icon: "time-outline",
+    },
+    {
+      label: "Overdue",
+      value: fees ? formatCurrency(fees.overdue) : "—",
+      color: Colors.red,
+      bg: Colors.redSoft,
+      icon: "alert-circle-outline",
+    },
   ];
 
   /* ---- FlatList data ---- */
   const listData: Array<
-    | { type: 'info' }
-    | { type: 'feeSummary' }
-    | { type: 'paymentHeader' }
-    | { type: 'payment'; item: Payment }
+    | { type: "info" }
+    | { type: "feeSummary" }
+    | { type: "paymentHeader" }
+    | { type: "payment"; item: Payment }
   > = [
-    { type: 'info' },
-    { type: 'feeSummary' },
-    { type: 'paymentHeader' },
-    ...payments.map((p) => ({ type: 'payment' as const, item: p })),
+    { type: "info" },
+    { type: "feeSummary" },
+    { type: "paymentHeader" },
+    ...payments.map((p) => ({ type: "payment" as const, item: p })),
   ];
 
   /* ---- Render helpers ---- */
@@ -214,7 +262,9 @@ export default function StudentProfileScreen() {
             </View>
             <View style={styles.infoRowContent}>
               <Text style={styles.infoRowLabel}>{row.label}</Text>
-              <Text style={styles.infoRowValue} numberOfLines={2}>{row.value}</Text>
+              <Text style={styles.infoRowValue} numberOfLines={2}>
+                {row.value}
+              </Text>
             </View>
           </View>
         ))}
@@ -225,8 +275,13 @@ export default function StudentProfileScreen() {
   const renderFeeSummary = () => (
     <View style={styles.feeGrid}>
       {feeCards.map((fc) => (
-        <Card key={fc.label} style={[styles.feeCard, { backgroundColor: fc.bg }]}>
-          <View style={[styles.feeIconBox, { backgroundColor: fc.color + '18' }] }>
+        <Card
+          key={fc.label}
+          style={[styles.feeCard, { backgroundColor: fc.bg }]}
+        >
+          <View
+            style={[styles.feeIconBox, { backgroundColor: fc.color + "18" }]}
+          >
             <Ionicons name={fc.icon as any} size={18} color={fc.color} />
           </View>
           <Text style={styles.feeLabel}>{fc.label}</Text>
@@ -239,7 +294,9 @@ export default function StudentProfileScreen() {
   const renderPaymentHeader = () => (
     <View style={styles.sectionHeaderRow}>
       <Text style={styles.sectionTitle}>Payment History</Text>
-      <Text style={styles.sectionCount}>{payments.length} record{payments.length !== 1 ? 's' : ''}</Text>
+      <Text style={styles.sectionCount}>
+        {payments.length} record{payments.length !== 1 ? "s" : ""}
+      </Text>
     </View>
   );
 
@@ -249,15 +306,23 @@ export default function StudentProfileScreen() {
       <Card key={payment.id} style={styles.paymentCard}>
         <View style={styles.paymentTop}>
           <View style={styles.paymentModeRow}>
-            <Ionicons name={MODE_ICON[payment.mode] as any} size={16} color={Colors.muted} />
+            <Ionicons
+              name={MODE_ICON[payment.mode] as any}
+              size={16}
+              color={Colors.muted}
+            />
             <Text style={styles.paymentMode}>{payment.mode}</Text>
           </View>
           <Badge variant={ps.variant}>{ps.label}</Badge>
         </View>
-        <Text style={styles.paymentDesc} numberOfLines={2}>{payment.description}</Text>
+        <Text style={styles.paymentDesc} numberOfLines={2}>
+          {payment.description}
+        </Text>
         <View style={styles.paymentBottom}>
           <Text style={styles.paymentDate}>{formatDate(payment.date)}</Text>
-          <Text style={styles.paymentAmount}>{formatCurrency(payment.amount)}</Text>
+          <Text style={styles.paymentAmount}>
+            {formatCurrency(payment.amount)}
+          </Text>
         </View>
       </Card>
     );
@@ -282,13 +347,13 @@ export default function StudentProfileScreen() {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           switch (item.type) {
-            case 'info':
+            case "info":
               return renderInfo();
-            case 'feeSummary':
+            case "feeSummary":
               return renderFeeSummary();
-            case 'paymentHeader':
+            case "paymentHeader":
               return renderPaymentHeader();
-            case 'payment':
+            case "payment":
               return renderPayment(item.item);
             default:
               return null;
@@ -296,7 +361,9 @@ export default function StudentProfileScreen() {
         }}
         ListEmptyComponent={
           <Card>
-            <Text style={styles.noPaymentsText}>No payment records available.</Text>
+            <Text style={styles.noPaymentsText}>
+              No payment records available.
+            </Text>
           </Card>
         }
       />
@@ -316,16 +383,16 @@ const styles = StyleSheet.create({
 
   /* ---- Header ---- */
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.md,
   },
   headerTitle: {
     fontSize: FontSize.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -344,7 +411,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: FontSize.lg,
     color: Colors.muted,
-    textAlign: 'center',
+    textAlign: "center",
     includeFontPadding: false,
   },
 
@@ -356,13 +423,13 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
   },
   infoNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   infoName: {
     fontSize: FontSize.xxl,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.ink,
     flex: 1,
     marginRight: Spacing.md,
@@ -377,8 +444,8 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: Spacing.md,
   },
   infoRowIconBox: {
@@ -386,8 +453,8 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: Radius.sm,
     backgroundColor: Colors.soft,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 2,
   },
   infoRowContent: {
@@ -396,9 +463,9 @@ const styles = StyleSheet.create({
   },
   infoRowLabel: {
     fontSize: FontSize.sm,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.faint,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.3,
     includeFontPadding: false,
   },
@@ -410,15 +477,15 @@ const styles = StyleSheet.create({
 
   /* ---- Fee summary grid ---- */
   feeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: Spacing.md,
     marginHorizontal: -Spacing.sm,
   },
   feeCard: {
-    width: '48%',
-    marginLeft: '1%',
-    marginRight: '1%',
+    width: "48%",
+    marginLeft: "1%",
+    marginRight: "1%",
     borderWidth: 0,
     gap: Spacing.sm,
   },
@@ -426,33 +493,33 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: Radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   feeLabel: {
     fontSize: FontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.muted,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.3,
     includeFontPadding: false,
   },
   feeValue: {
     fontSize: FontSize.xl,
-    fontWeight: '700',
+    fontWeight: "700",
     includeFontPadding: false,
   },
 
   /* ---- Section header ---- */
   sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginTop: Spacing.sm,
   },
   sectionTitle: {
     fontSize: FontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -467,18 +534,18 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   paymentTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   paymentModeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.xs,
   },
   paymentMode: {
     fontSize: FontSize.base,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -488,9 +555,9 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   paymentBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   paymentDate: {
     fontSize: FontSize.sm,
@@ -499,7 +566,7 @@ const styles = StyleSheet.create({
   },
   paymentAmount: {
     fontSize: FontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -508,7 +575,7 @@ const styles = StyleSheet.create({
   noPaymentsText: {
     fontSize: FontSize.base,
     color: Colors.muted,
-    textAlign: 'center',
+    textAlign: "center",
     includeFontPadding: false,
   },
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -11,16 +11,16 @@ import {
   TextStyle,
   TextInputProps,
   StyleProp,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, FontSize } from '@/src/theme';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Colors, Spacing, Radius, FontSize } from "@/src/theme";
 
 /* ------------------------------------------------------------------ */
 /*  Button                                                            */
 /* ------------------------------------------------------------------ */
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
-type ButtonSize = 'sm' | 'md';
+type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonSize = "sm" | "md";
 
 interface ButtonProps {
   variant?: ButtonVariant;
@@ -32,24 +32,30 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-const buttonSizeStyles: Record<ButtonSize, { button: ViewStyle; text: TextStyle }> = {
+const buttonSizeStyles: Record<
+  ButtonSize,
+  { button: ViewStyle; text: TextStyle }
+> = {
   sm: {
     button: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg },
-    text: { fontSize: FontSize.base, fontWeight: '500' as const },
+    text: { fontSize: FontSize.base, fontWeight: "500" as const },
   },
   md: {
     button: { paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl },
-    text: { fontSize: FontSize.lg, fontWeight: '500' as const },
+    text: { fontSize: FontSize.lg, fontWeight: "500" as const },
   },
 };
 
-const buttonVariantStyles: Record<ButtonVariant, { button: ViewStyle; text: TextStyle }> = {
+const buttonVariantStyles: Record<
+  ButtonVariant,
+  { button: ViewStyle; text: TextStyle }
+> = {
   primary: {
     button: {
       backgroundColor: Colors.accent,
     },
     text: {
-      color: '#ffffff',
+      color: "#ffffff",
     },
   },
   secondary: {
@@ -64,7 +70,7 @@ const buttonVariantStyles: Record<ButtonVariant, { button: ViewStyle; text: Text
   },
   ghost: {
     button: {
-      backgroundColor: 'transparent',
+      backgroundColor: "transparent",
     },
     text: {
       color: Colors.muted,
@@ -73,8 +79,8 @@ const buttonVariantStyles: Record<ButtonVariant, { button: ViewStyle; text: Text
 };
 
 export function Button({
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   children,
   onPress,
   disabled = false,
@@ -97,7 +103,7 @@ export function Button({
         style,
       ]}
     >
-      <Text style={[styles.buttonText, sizeStyle.text, variantStyle.text, disabled && styles.buttonTextDisabled]}>
+      <Text style={[styles.buttonText, sizeStyle.text, variantStyle.text]}>
         {children}
       </Text>
     </Pressable>
@@ -119,7 +125,10 @@ export function Card({ children, style, onPress }: CardProps) {
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+      >
         {inner}
       </Pressable>
     );
@@ -132,7 +141,7 @@ export function Card({ children, style, onPress }: CardProps) {
 /*  Badge                                                             */
 /* ------------------------------------------------------------------ */
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'error';
+type BadgeVariant = "default" | "success" | "warning" | "error";
 
 interface BadgeProps {
   variant?: BadgeVariant;
@@ -147,7 +156,7 @@ const badgeVariantStyles: Record<BadgeVariant, { bg: string; text: string }> = {
   error: { bg: Colors.redSoft, text: Colors.redText },
 };
 
-export function Badge({ variant = 'default', children, style }: BadgeProps) {
+export function Badge({ variant = "default", children, style }: BadgeProps) {
   const v = badgeVariantStyles[variant];
   return (
     <View style={[styles.badge, { backgroundColor: v.bg }, style]}>
@@ -187,7 +196,7 @@ interface PageLoaderProps {
 }
 
 export function PageLoader({ message, text }: PageLoaderProps) {
-  const label = message ?? text ?? 'Loading...';
+  const label = message ?? text ?? "Loading...";
   return (
     <View style={styles.pageLoader}>
       <ActivityIndicator size="large" color={Colors.accent} />
@@ -218,7 +227,9 @@ export function IconBadge({ iconName, count, onPress }: IconBadgeProps) {
       <Ionicons name={iconName} size={22} color={Colors.muted} />
       {count != null && count > 0 ? (
         <View style={styles.iconBadgeDot}>
-          <Text style={styles.iconBadgeCount}>{count > 99 ? '99+' : count}</Text>
+          <Text style={styles.iconBadgeCount}>
+            {count > 99 ? "99+" : count}
+          </Text>
         </View>
       ) : null}
     </Pressable>
@@ -237,7 +248,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  iconName = 'folder-open-outline',
+  iconName = "folder-open-outline",
   icon,
   title,
   subtitle,
@@ -246,7 +257,9 @@ export function EmptyState({
     <View style={styles.emptyState}>
       <Ionicons name={icon ?? iconName} size={48} color={Colors.faint} />
       <Text style={styles.emptyStateTitle}>{title}</Text>
-      {subtitle ? <Text style={styles.emptyStateSubtitle}>{subtitle}</Text> : null}
+      {subtitle ? (
+        <Text style={styles.emptyStateSubtitle}>{subtitle}</Text>
+      ) : null}
     </View>
   );
 }
@@ -258,20 +271,20 @@ export function EmptyState({
 const styles = StyleSheet.create({
   /* Button */
   buttonBase: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: Radius.md,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   buttonText: {
     letterSpacing: 0.2,
     includeFontPadding: false,
   },
   buttonFullWidth: {
-    width: '100%',
-    alignSelf: 'stretch',
+    width: "100%",
+    alignSelf: "stretch",
   },
   buttonDisabled: {
     opacity: 0.45,
@@ -288,7 +301,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.line,
     padding: Spacing.lg,
     // Subtle shadow – kept minimal to match the web elevation
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 3,
@@ -297,14 +310,14 @@ const styles = StyleSheet.create({
 
   /* Badge */
   badge: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     borderRadius: Radius.full,
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.md,
   },
   badgeText: {
     fontSize: FontSize.sm,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     letterSpacing: 0.2,
     includeFontPadding: false,
   },
@@ -312,11 +325,11 @@ const styles = StyleSheet.create({
   /* Input */
   inputWrapper: {
     gap: Spacing.xs,
-    width: '100%',
+    width: "100%",
   },
   inputLabel: {
     fontSize: FontSize.base,
-    fontWeight: '500' as const,
+    fontWeight: "500" as const,
     color: Colors.ink,
     includeFontPadding: false,
   },
@@ -336,8 +349,8 @@ const styles = StyleSheet.create({
   /* PageLoader */
   pageLoader: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: Spacing.lg,
     paddingVertical: Spacing.xxxl,
   },
@@ -349,44 +362,44 @@ const styles = StyleSheet.create({
 
   /* IconBadge */
   iconBadgeButton: {
-    position: 'relative' as const,
+    position: "relative" as const,
     width: 36,
     height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: Radius.md,
   },
   iconBadgeDot: {
-    position: 'absolute' as const,
+    position: "absolute" as const,
     top: 2,
     right: 2,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
     backgroundColor: Colors.red,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 4,
   },
   iconBadgeCount: {
     fontSize: FontSize.xs,
-    fontWeight: '700' as const,
-    color: '#ffffff',
+    fontWeight: "700" as const,
+    color: "#ffffff",
     includeFontPadding: false,
-    textAlign: 'center' as const,
+    textAlign: "center" as const,
   },
 
   /* EmptyState */
   emptyState: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: Spacing.xxxl * 2,
     gap: Spacing.md,
   },
   emptyStateTitle: {
     fontSize: FontSize.xl,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.muted,
     marginTop: Spacing.md,
     includeFontPadding: false,
