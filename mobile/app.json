@@ -8,7 +8,11 @@
     "userInterfaceStyle": "light",
     "scheme": "gurukul",
     "newArchEnabled": true,
-    "plugins": ["expo-router", "expo-secure-store", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gurukul.app"
@@ -17,7 +21,11 @@
       "package": "com.gurukul.app"
     },
     "extra": {
-      "apiUrl": ""
+      "apiUrl": "",
+      "router": {},
+      "eas": {
+        "projectId": "62d87d6f-69d1-4ba1-8289-f1fe67f6cae0"
+      }
     }
   }
 }
