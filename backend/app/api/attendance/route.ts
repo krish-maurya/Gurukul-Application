@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { draftAbsenceMessages } from "@/lib/communication/engine";
 import { AuthError, requireSession } from "@/lib/auth/server";
 
+// Attendance reads live database state and must only run per request.
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
