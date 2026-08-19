@@ -6,16 +6,23 @@ import { router } from "expo-router";
 import { Text, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/src/theme";
+import { PageLoader } from "@/src/components/UI";
 
 export default function TabLayout() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    if (user === null) {
+    if (!isLoading && user === null) {
       router.replace("/(auth)/login");
     }
-  }, [user]);
+  }, [isLoading, user]);
+
+  // Do not mount the navigator before SecureStore finishes restoring the
+  // session. On a first install `user` is temporarily null and redirecting
+  // during that window caused the production error screen.
+  if (isLoading) return <PageLoader message="Preparing your workspace" />;
+  if (!user) return null;
 
   return (
     <Tabs

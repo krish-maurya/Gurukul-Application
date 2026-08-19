@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TextInput,
   StyleSheet,
   ActivityIndicator,
+  Animated,
   Modal,
   ViewStyle,
   TextStyle,
@@ -197,9 +198,25 @@ interface PageLoaderProps {
 
 export function PageLoader({ message, text }: PageLoaderProps) {
   const label = message ?? text ?? "Loading...";
+  const pulse = useRef(new Animated.Value(0.35)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.35, duration: 700, useNativeDriver: true }),
+      ]),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [pulse]);
+
   return (
     <View style={styles.pageLoader}>
-      <ActivityIndicator size="large" color={Colors.accent} />
+      <View style={styles.loaderMark}>
+        <Ionicons name="school-outline" size={23} color={Colors.accent} />
+        <Animated.View style={[styles.loaderDot, { opacity: pulse }]} />
+      </View>
       <Text style={styles.pageLoaderText}>{label}</Text>
     </View>
   );
@@ -351,13 +368,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: Spacing.lg,
+    gap: Spacing.md,
     paddingVertical: Spacing.xxxl,
   },
   pageLoaderText: {
     fontSize: FontSize.base,
     color: Colors.muted,
     includeFontPadding: false,
+  },
+  loaderMark: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: Colors.accentSoft,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loaderDot: {
+    position: "absolute",
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    right: 8,
+    top: 8,
+    backgroundColor: Colors.green,
+    borderWidth: 2,
+    borderColor: Colors.canvas,
   },
 
   /* IconBadge */

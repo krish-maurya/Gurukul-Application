@@ -7,7 +7,9 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
+  Modal,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Button, Card, PageLoader } from "@/src/components/UI";
 import api from "@/src/api/client";
 import { Colors, FontSize, Radius, Spacing } from "@/src/theme";
@@ -42,6 +44,8 @@ export default function AttendanceScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [reviewVisible, setReviewVisible] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
   const selectedId = selected?.id;
   const load = useCallback(async () => {
     setLoading(true);
@@ -120,6 +124,7 @@ export default function AttendanceScreen() {
     );
   const submit = async () => {
     if (!selected || !rolls.length) return;
+    setReviewVisible(false);
     setSaving(true);
     const result = await api.post("/api/attendance", {
       grade: selected.grade,
@@ -131,10 +136,7 @@ export default function AttendanceScreen() {
     if (result.error) Alert.alert("Attendance not saved", result.error);
     else {
       setSubmitted(true);
-      Alert.alert(
-        "Attendance submitted",
-        `${rolls.length - absent} present · ${absent} absent.`,
-      );
+      setSuccessVisible(true);
     }
   };
   if (loading && !selected)
@@ -233,7 +235,7 @@ export default function AttendanceScreen() {
         <Button
           fullWidth
           disabled={saving || !rolls.length}
-          onPress={submitted ? () => setSubmitted(false) : submit}
+          onPress={submitted ? () => setSubmitted(false) : () => setReviewVisible(true)}
         >
           {saving
             ? "Saving..."
@@ -242,6 +244,34 @@ export default function AttendanceScreen() {
               : "Review & Submit"}
         </Button>
       </View>
+      <Modal visible={reviewVisible} transparent animationType="fade" onRequestClose={() => setReviewVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.reviewModal}>
+            <View style={styles.modalHeader}>
+              <View><Text style={styles.modalTitle}>Confirm Attendance</Text><Text style={styles.modalSub}>{selected?.label} (Sec {selected?.section}) · {date}</Text></View>
+              <Pressable hitSlop={12} onPress={() => setReviewVisible(false)}><Ionicons name="close" size={23} color={Colors.muted} /></Pressable>
+            </View>
+            <View style={styles.countRow}>
+              <View style={styles.countCard}><Text style={styles.countLabel}>PRESENT</Text><Text style={styles.countValue}>{rolls.length - absent}</Text></View>
+              <View style={styles.countCard}><Text style={styles.countLabel}>ABSENT</Text><Text style={styles.countValue}>{absent}</Text></View>
+            </View>
+            {absent > 0 ? <><Text style={styles.absentHeading}>ABSENT STUDENTS ({absent})</Text><View style={styles.absentList}>{rolls.filter((student) => student.status === "ABSENT").map((student) => <View key={student.id} style={styles.absentRow}><View style={styles.rollBadge}><Text style={styles.rollBadgeText}>#{student.rollNumber}</Text></View><Text style={styles.studentName}>{student.name}</Text><Text style={styles.absentPill}>ABSENT</Text></View>)}</View></> : <Text style={styles.allPresent}>Everyone is marked present today.</Text>}
+            <Text style={styles.saveNote}>Attendance for {rolls.length} students will be saved.</Text>
+            <View style={styles.modalActions}><Button variant="secondary" size="md" onPress={() => setReviewVisible(false)}>Go Back</Button><Button size="md" disabled={saving} onPress={submit}>{saving ? "Saving…" : "Submit"}</Button></View>
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={successVisible} transparent animationType="fade" onRequestClose={() => setSuccessVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.successModal}>
+            <Pressable style={styles.successClose} hitSlop={12} onPress={() => setSuccessVisible(false)}><Ionicons name="close" size={22} color={Colors.muted} /></Pressable>
+            <View style={styles.successIcon}><Ionicons name="checkmark" size={42} color={Colors.green} /></View>
+            <Text style={styles.successTitle}>Attendance submitted</Text>
+            <Text style={styles.successText}>{selected?.label} attendance for {date} has been saved. {rolls.length} students recorded.</Text>
+            <Button fullWidth size="md" onPress={() => setSuccessVisible(false)} style={styles.doneButton}>Done</Button>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -320,4 +350,29 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.line,
   },
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(17, 19, 18, 0.42)", justifyContent: "center", padding: Spacing.md },
+  reviewModal: { backgroundColor: Colors.surface, borderRadius: Radius.xl, overflow: "hidden", maxHeight: "92%" },
+  modalHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", padding: Spacing.xl, borderBottomWidth: 1, borderBottomColor: Colors.line },
+  modalTitle: { fontSize: FontSize.xl, fontWeight: "800", color: Colors.ink },
+  modalSub: { fontSize: FontSize.md, color: Colors.faint, marginTop: 5 },
+  countRow: { flexDirection: "row", gap: Spacing.md, paddingHorizontal: Spacing.xl, paddingTop: Spacing.xl },
+  countCard: { flex: 1, alignItems: "center", paddingVertical: Spacing.lg, borderWidth: 1, borderColor: Colors.lineStrong, borderRadius: Radius.lg, backgroundColor: Colors.hover },
+  countLabel: { fontSize: FontSize.base, fontWeight: "700", color: Colors.muted, letterSpacing: 1.2 },
+  countValue: { fontSize: 27, fontWeight: "800", color: Colors.ink, marginTop: 8 },
+  absentHeading: { fontSize: FontSize.base, fontWeight: "700", letterSpacing: 1.1, color: Colors.muted, marginHorizontal: Spacing.xl, marginTop: Spacing.xl, marginBottom: Spacing.md },
+  absentList: { borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.line, marginHorizontal: Spacing.xl },
+  absentRow: { minHeight: 58, flexDirection: "row", alignItems: "center", gap: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.line, paddingVertical: Spacing.sm },
+  rollBadge: { width: 38, height: 38, borderRadius: 10, backgroundColor: Colors.accent, alignItems: "center", justifyContent: "center" },
+  rollBadgeText: { color: "#fff", fontSize: FontSize.md, fontWeight: "800" },
+  studentName: { flex: 1, fontSize: FontSize.lg, color: Colors.ink, fontWeight: "600" },
+  absentPill: { color: Colors.muted, backgroundColor: Colors.soft, overflow: "hidden", paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.sm, fontSize: FontSize.sm, fontWeight: "700" },
+  allPresent: { color: Colors.greenText, backgroundColor: Colors.greenSoft, marginHorizontal: Spacing.xl, marginTop: Spacing.xl, padding: Spacing.md, borderRadius: Radius.md, textAlign: "center", fontSize: FontSize.md },
+  saveNote: { color: Colors.faint, fontSize: FontSize.base, margin: Spacing.xl, marginBottom: Spacing.lg },
+  modalActions: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 1, borderTopColor: Colors.line, padding: Spacing.lg },
+  successModal: { position: "relative", backgroundColor: Colors.surface, borderRadius: Radius.xl, marginHorizontal: Spacing.lg, padding: Spacing.xxl, alignItems: "center" },
+  successClose: { position: "absolute", top: Spacing.md, right: Spacing.md },
+  successIcon: { width: 94, height: 94, borderRadius: 47, borderWidth: 1.5, borderColor: "#9cdec7", backgroundColor: Colors.greenSoft, alignItems: "center", justifyContent: "center", marginTop: Spacing.md, marginBottom: Spacing.xl },
+  successTitle: { fontSize: FontSize.xl, color: Colors.ink, fontWeight: "800" },
+  successText: { fontSize: FontSize.md, color: Colors.muted, textAlign: "center", lineHeight: 21, marginTop: Spacing.md },
+  doneButton: { marginTop: Spacing.xl, minHeight: 52 },
 });

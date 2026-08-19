@@ -36,21 +36,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
-    const { data } = await api.get<{ user: UserSession | null }>(
-      "/api/auth/me",
-    );
-    if (data?.user) {
-      setUser(data.user);
-    } else {
+    try {
+      const { data } = await api.get<{ user: UserSession | null }>(
+        "/api/auth/me",
+      );
+      if (data?.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+        await SecureStore.deleteItemAsync("gurukul_token");
+      }
+    } catch {
+      // A missing/corrupt secure-store entry must never prevent the app from
+      // reaching the sign-in screen on a fresh install.
       setUser(null);
-      await SecureStore.deleteItemAsync("gurukul_token");
     }
   }, []);
 
   useEffect(() => {
     (async () => {
-      await refreshUser();
-      setIsLoading(false);
+      try {
+        await refreshUser();
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, [refreshUser]);
 
